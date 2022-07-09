@@ -38,3 +38,4 @@ vandelay-py.js
 celerybeat-schedule
 .pre-commit-config.yaml
 
+__pycache__
