@@ -20,9 +20,11 @@ class ProcessorFactory:
 
     @classmethod
     def build(cls, foo):
+        # Tests failed:
         clazz = [subclass for subclass in BaseProcessor.__subclasses__() if subclass.foo_type == type(foo)][0]
         return clazz(foo=foo)
 
+        # Tests work:
         # if type(foo) == str:
         #     return StringProcessor(foo=foo)
         # return IntProcessor(foo=foo)
@@ -45,5 +47,7 @@ class MyTest(TestCase):
         mock.assert_called_with(foo=123)
 
 
+# To run tests:
+# python -m unittest tests/test_abstract_factory_mock.py
 if __name__ == '__main__':
     unittest.main()

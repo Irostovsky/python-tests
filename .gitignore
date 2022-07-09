@@ -3,6 +3,7 @@ test.db
 db.sqlite3
 backup.db
 *.pyc
+
 *.ipynb*
 *.log
 django.log.*
@@ -36,3 +37,4 @@ node_modules
 vandelay-py.js
 celerybeat-schedule
 .pre-commit-config.yaml
+
