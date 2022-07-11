@@ -1,4 +1,3 @@
-import unittest
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -16,38 +15,48 @@ class IntProcessor(BaseProcessor):
     foo_type = int
 
 
-class ProcessorFactory:
+class ProcessorFactoryDynamic:
 
     @classmethod
     def build(cls, foo):
-        # Tests failed:
         clazz = [subclass for subclass in BaseProcessor.__subclasses__() if subclass.foo_type == type(foo)][0]
         return clazz(foo=foo)
 
-        # Tests work:
-        # if type(foo) == str:
-        #     return StringProcessor(foo=foo)
-        # return IntProcessor(foo=foo)
+
+class ProcessorFactoryStatic:
+
+    @classmethod
+    def build(cls, foo):
+        if type(foo) == str:
+            return StringProcessor(foo=foo)
+        return IntProcessor(foo=foo)
 
 
-class MyTest(TestCase):
+class ProcessorFactoryTestCase(TestCase):
 
-    @patch('tests.test_abstract_factory_mock.StringProcessor')
-    def test_str_processor(self, mock):
-        mock.return_value = 'some_value'
-        actual = ProcessorFactory.build(foo='string')
-        self.assertEqual(actual, 'some_value')
-        mock.assert_called_with(foo='string')
+    def test_str_processor_static(self, ):
+        with patch('tests.test_abstract_factory_mock.StringProcessor') as mock:
+            mock.return_value = 'some_value'
+            actual = ProcessorFactoryStatic.build(foo='string')
+            self.assertEqual(actual, 'some_value')
+            mock.assert_called_with(foo='string')
 
-    @patch('tests.test_abstract_factory_mock.IntProcessor')
-    def test_int_processor(self, mock):
-        mock.return_value = 'some_value'
-        actual = ProcessorFactory.build(foo=123)
-        self.assertEqual(actual, 'some_value')
-        mock.assert_called_with(foo=123)
+    def test_str_processor_dynamic_init(self):
+        with patch.object(StringProcessor, "__init__", return_value=None) as mock:
+            actual = ProcessorFactoryDynamic.build(foo='string')
+            self.assertTrue(isinstance(actual, StringProcessor))
+            mock.assert_called_with(foo='string')
 
+    def test_str_processor_dynamic_new(self):
+        with patch('tests.test_abstract_factory_mock.BaseProcessor.__new__') as mock:
+            mock.return_value = 'some_value'
+            actual = ProcessorFactoryDynamic.build(foo='string')
+            self.assertEqual(actual, 'some_value')
+            mock.assert_called_with(StringProcessor, foo='string')
 
-# To run tests:
-# python -m unittest tests/test_abstract_factory_mock.py
-if __name__ == '__main__':
-    unittest.main()
+    # def test_int_processor_static(self):
+    #     with patch('tests.test_abstract_factory_mock.IntProcessor') as mock:
+    #         mock.return_value = 'some_value'
+    #         actual = ProcessorFactoryStatic.build(foo=123)
+    #         self.assertEqual(actual, 'some_value')
+    #         mock.assert_called_with(foo=123)
