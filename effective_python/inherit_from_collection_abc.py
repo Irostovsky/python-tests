@@ -1,4 +1,5 @@
 import itertools
+from collections.abc import Sequence
 
 
 class BinaryNode:
@@ -29,25 +30,17 @@ class IndexableNode(BinaryNode):
         return found.value
 
 
+class SequanceNode(IndexableNode):
+
+    def __len__(self):
+        return len(flatten(self))
+
+
+class CollectionNode(SequanceNode, Sequence):
+    pass
+
+
 if __name__ == '__main__':
-    tree = IndexableNode(10)
-    assert list(tree) == [10]
-
-    tree = IndexableNode(10,
-                         left=IndexableNode(5))
-    assert list(tree) == [5, 10]
-
-    tree = IndexableNode(10,
-                         left=IndexableNode(5),
-                         right=IndexableNode(15))
-    assert list(tree) == [5, 10, 15]
-
-    tree = IndexableNode(10,
-                         left=IndexableNode(5,
-                                            left=IndexableNode(2)),
-                         right=IndexableNode(15))
-    assert list(tree) == [2, 5, 10, 15]
-
     #      10
     #    /    \
     #   5      15
@@ -55,13 +48,13 @@ if __name__ == '__main__':
     # 2   6  11
     #       \
     #         7
-    tree = IndexableNode(
+    tree = CollectionNode(
         10,
-        left=IndexableNode(5,
-                           left=IndexableNode(2),
-                           right=IndexableNode(
-                               6, right=IndexableNode(7))),
-        right=IndexableNode(15, left=IndexableNode(11))
+        left=CollectionNode(5,
+                            left=CollectionNode(2),
+                            right=CollectionNode(
+                                6, right=CollectionNode(7))),
+        right=CollectionNode(15, left=CollectionNode(11))
 
     )
 
@@ -70,3 +63,5 @@ if __name__ == '__main__':
     assert list(tree) == [2, 5, 6, 7, 10, 11, 15]
     print('Tree: ', list(tree))
     print(len(tree))
+    assert tree.index(7) == 3
+    assert tree.count(10) == 1
